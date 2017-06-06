@@ -1,0 +1,40 @@
+body {
+	font-family: Arial, sans-serif;
+}
+
+#galton_box {
+	max-width: 600px;
+}
+
+svg {
+	background-color: #cc8452;
+	border-top: 20px solid #ffcd74;
+	border-bottom: 20px solid #ffcd74;
+	border-left: 20px solid #5a320f;
+	border-right: 20px solid #5a320f;
+	box-sizing: border-box;
+}	
+
+.grayed_out circle {
+	opacity: 0.25;
+}
+
+.grayed_out text {
+	opacity: 0;
+}
+
+#button {
+	text-align: center;
+	margin-bottom: 5px;
+}
+
+#button button {
+	outline: none;
+	border: 1px solid black;
+	border-radius: 5px;
+	padding: 4px 10px 5px 10px;
+	font-size: 18px;
+	color: black;
+	background-color: white;
+	cursor: pointer;
+}

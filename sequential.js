@@ -20,7 +20,6 @@ var base = elasticSVG("#triangle_container", {
 var svg = d3.select(base.svg);
 
 // we're going to call paths through the triangle "routes" to avoid confusion with the <path> element
-
 var routes = svg.append("g").attr("id", "routes");
 var triangle = svg.append("g").attr("id", "triangle");
 
@@ -121,7 +120,7 @@ var fork = function(point) {
 
 	ball.remove();
 
-	var delay = Math.random() * 5000;
+	var delay = Math.random() * 1000;
 
 	setTimeout(function() {
 		// animate them to their new positions

@@ -1,26 +1,22 @@
 <!DOCTYPE html>
-<meta charset="utf-8">
-<style>
-  body {
-    font-family: Arial, sans-serif;
-  }
-
-  #triangle_container {
-    max-width: 900px;
-  }
-
-  svg {
-    border: 1px solid pink;
-  }
-</style>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" type="text/css" href="galton.css">
+</head>
 <body>
-  <div id="triangle_container"></div>
-
+  <div id="galton_box">
+    <div id="button">
+      <button>START</button>
+    </div>
+    <div id="triangle_container"></div>
+  </div>
+  
   <script src="src/d3.min.js"></script>
   <script src="src/async.min.js"></script>
   <script src="elastic-svg.js"></script>
   <!--<script src="sequential.js"></script>-->
-  <script src="tiered.js"></script>
+  <!--<script src="tiered.js"></script>-->
+  <script src="galton.js"></script>
 
 </body>
 </html>

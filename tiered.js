@@ -1,12 +1,12 @@
-// first, let's generate the paths
-
 // recursively generate every path down to the nth-level
-var make_paths = function(level) {
+// paths are just a string of N 0's and 1's indicating whether they should go left (0) or right (1) at each junction
+
+var make_paths = function(N) {
 	var paths = [];
 	var f = function(path) {
 		var left = path + "0";
 		var right = path + "1";
-		if (left.length == level) {
+		if (left.length == N) {
 			paths.push(left, right);
 			return;
 		}
@@ -17,21 +17,25 @@ var make_paths = function(level) {
 	return paths;
 }
 
-// let's make the paths for a triangle down to 5 levels
+// let's make the paths for a triangle down to 5 levels, no counting the first point
 var paths = [["0"]];
 
 for (var c = 1; c <= 5; c += 1) {
 	paths.push(make_paths(c));
 }
 
-// let's draw the dots of the triangle and their counts
+console.log(paths);
 
+// draw the empty triangle
 var width = 900,
 	height = 900,
 	ROW_HEIGHT = 75,
 	POINT_SPACE = 100,
-	RADIUS = 3;
+	RADIUS = 3,
+	RADIUS_BALL = 8;	
 
+// This makes SVGs responsive to page size
+// https://github.com/TimeMagazine/elastic-svg
 var base = elasticSVG("#triangle_container", {
 	width: width,
 	aspect: 1,
@@ -62,9 +66,10 @@ var rows = triangle.selectAll(".row")
 		return offset;
 	});
 
+// add containers for the points and numbers to each row
 var points = rows.selectAll(".point")
 	.data(function(d) {
-		return d3.range(1, d+1, 1);
+		return d3.range(1, d + 1, 1);
 	})
 	.enter()
 	.append("g")
@@ -92,24 +97,22 @@ points.append("text")
 	.style("font-size", "20px")
 	.style("text-anchor", "middle");
 
-// and test drawing paths
-
-console.log(paths);
-
 var line = d3.line()
 	.x(function(d) { return d.x; })
 	.y(function(d) { return d.y; });
 
+// for a given row and point index, get the dots's coordinates
 var get_point_coordinates = function(row, point) {
 	var x = parseInt(svg.select("#row_" + row).attr("data-offsetx"), 10) + point * POINT_SPACE + POINT_SPACE / 2;
 	var y = row * ROW_HEIGHT + ROW_HEIGHT / 2; 
 	return { x: x, y: y }
 }
 
+// for a given path, trace its route through the triangle
 var draw_path = function(path) {
 	var forks = path.split("");
 
-	var coordinates = [get_point_coordinates(0, 0)];
+	var coordinates = [ get_point_coordinates(0, 0) ];
 
 	var p_point = 0;
 
@@ -120,13 +123,46 @@ var draw_path = function(path) {
 		coordinates.push(get_point_coordinates(p_row + 1, p_point));
 	});
 
+	var terminal = coordinates.slice(-1)[0];
+
+	path_routes.selectAll(".route").remove();
+	triangle.selectAll(".ball").remove();
+
 	path_routes.append("path")
 		.attr("d", line(coordinates))
 		.style("fill", "none")
 		.style("stroke", "#C00")
 		.style("stroke-width", "1px")
-		.attr("class", "route");
+		.attr("class", "route");	
+
+	triangle.append("circle")
+		.attr("cx", terminal.x)
+		.attr("cy", terminal.y)
+		.attr("r", RADIUS_BALL)
+		.style("fill", "#C00")
+		.attr("class", "ball");
+
+	var p_row = path.length;
+
+	var count = parseInt(triangle.select("#point_" + p_row + "_" + p_point + " text").text(), 10);
+	count += 1;
+	triangle.select("#point_" + p_row + "_" + p_point + " text").text(count);
+
 }
+
+function draw_paths(level) {
+	// shuffle(paths[level]);
+	async.eachSeries(paths[5], function(path, callback) {
+		setTimeout(function() {
+			draw_path(path);
+			callback();
+		}, 200);
+	}, function() {
+		console.log("done");
+	});
+}
+
+draw_paths(5);
 
 var animate_path = function(path, callback) {
 	var forks = path.split("");
@@ -136,7 +172,7 @@ var animate_path = function(path, callback) {
 	var ball = triangle.append("circle")
 		.attr("cx", coordinates[0].x)
 		.attr("cy", coordinates[0].y)
-		.attr("r", 8)
+		.attr("r", RADIUS_BALL)
 		.style("fill", "#C00");
 
 	var p_point = 0,
@@ -183,19 +219,18 @@ var animate_path = function(path, callback) {
 	}, 50);
 }
 
-//draw_path(paths[5][3]);
 
-var c = 0;
+function animate_paths(level) {
+	shuffle(paths[level]);
+	async.eachSeries(paths[level], function(path, callback) {
+		animate_path(path, function() {
+			callback();
+		});	
+	}, function() {
+		console.log("done");
+	});
+}
 
-shuffle(paths[5]);
-
-async.eachSeries(paths[5], function(path, callback) {
-	animate_path(path, function() {
-		callback();
-	});	
-}, function() {
-	console.log("done");
-});
 
 function shuffle(a) {
     var j, x, i;
