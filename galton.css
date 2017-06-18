@@ -15,6 +15,12 @@ svg {
 	box-sizing: border-box;
 }	
 
+#ball_pit path {
+	stroke-width: 20px;
+	stroke: #9c5f2a;
+
+}
+
 .grayed_out circle {
 	opacity: 0.25;
 }

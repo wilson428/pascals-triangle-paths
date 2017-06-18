@@ -32,8 +32,15 @@ var base = elasticSVG("#triangle_container", {
 var svg = d3.select(base.svg);
 
 // we're going to call paths through the triangle "routes" to avoid confusion with the <path> element
+var box = svg.append("g").attr("id", "box");
 var routes = svg.append("g").attr("id", "routes");
 var triangle = svg.append("g").attr("id", "triangle");
+
+// ball_pit diagonal supports
+//ball_pit.append("path").attr("d", "M0,100L" + (width / 2 - 10) + ",175");
+//ball_pit.append("path").attr("d", "M" + (width / 2 + 10) + ",175L" + width + ",100");
+
+var floor = box.append("rect").attr("width", width).attr("height", 5).attr("x", 0).attr("y", height-10).style("fill", 'brown');
 
 var rows = triangle.selectAll(".row")
 	.data(d3.range(1, N + 2, 1))
@@ -93,12 +100,15 @@ points.append("text")
 // recursively generate every path down to the Nth-level
 // paths are just a string of N 0's and 1's indicating whether they should go left (0) or right (1) at each junction
 
+var ball_count = 0;
+
 var make_paths = function(n) {
 	var paths = [];
 	var f = function(path) {
 		var left = path + "0";
 		var right = path + "1";
 		if (left.length == n) {
+			ball_count += 2;
 			paths.push(left, right);
 			return;
 		}
@@ -109,14 +119,12 @@ var make_paths = function(n) {
 	return paths;
 }
 
-// let's make the paths for a triangle down to 5 levels, no counting the first point
+// let's make the paths for a triangle down to N levels, no counting the first point
 var paths = [["0"]];
 
 for (var c = 1; c <= N; c += 1) {
 	paths.push(make_paths(c));
 }
-
-// console.log(paths);
 
 var line = d3.line()
 	.x(function(d) { return d.x; })
@@ -185,25 +193,31 @@ var animate_path = function(path, callback) {
 				callback();				
 			}, 400);
 		}
-	}, 25);
+	}, 150);
 }
 
 function animate_paths(level) {
-	//shuffle(paths[level]);
+	shuffle(paths[level]);
 
-	triangle.select("#row_" + level).classed("grayed_out", false);
+	// movie the floor
+	floor.transition().duration(1000)
+		.attr("y", level * ROW_HEIGHT + 28);
 
-	async.eachSeries(paths[level], function(path, callback) {
-		animate_path(path, function() {
-			callback();
-		});	
-	}, function() {
-		if (level < N) {
-			animate_paths(level + 1);
-		} else {
-			console.log("done");
-		}
-	});
+	setTimeout(function() {
+		triangle.select("#row_" + level).classed("grayed_out", false);
+
+		async.eachSeries(paths[level], function(path, callback) {
+			animate_path(path, function() {
+				callback();
+			});	
+		}, function() {
+			if (level < N) {
+				animate_paths(level + 1);
+			} else {
+				console.log("done");
+			}
+		});
+	}, 1000);
 }
 
 d3.select("#button button").on("click", function() {
