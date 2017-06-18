@@ -10,16 +10,19 @@ so that the Nth row begins `1  N  ... `
 */
 
 
-// draw the triangle, hiding the rows for now after the 0th row
+// draw the blank triangle
 
 var width = 700,
-	height = 425,
+	height = 375,
 	ROW_HEIGHT = 50,
 	POINT_SPACE = 75,
 	RADIUS = 3,
 	RADIUS_BALL = 8,
 	BALL_COLOR = "#808080";
-	N = 7; // how many rows we're making, starting at 1 1 (the first row)
+	N = 6, // how many rows we're making, starting at 1 1 (the first row)
+	PATH_SPEED = 100, // millisecond between each layer as a ball falls
+	PATH_DELAY = 400, // delay from one falling ball to the next
+	RANDOMSIZE_PATH_ORDER = false; // whether to show the paths in order or not
 
 // This makes SVGs responsive to page size
 // https://github.com/TimeMagazine/elastic-svg
@@ -36,10 +39,7 @@ var box = svg.append("g").attr("id", "box");
 var routes = svg.append("g").attr("id", "routes");
 var triangle = svg.append("g").attr("id", "triangle");
 
-// ball_pit diagonal supports
-//ball_pit.append("path").attr("d", "M0,100L" + (width / 2 - 10) + ",175");
-//ball_pit.append("path").attr("d", "M" + (width / 2 + 10) + ",175L" + width + ",100");
-
+// the red bar that represents the floor for each row
 var floor = box.append("rect").attr("width", width).attr("height", 5).attr("x", 0).attr("y", height-10).style("fill", 'brown');
 
 var rows = triangle.selectAll(".row")
@@ -191,17 +191,19 @@ var animate_path = function(path, callback) {
 				ball.remove();
 
 				callback();				
-			}, 400);
+			}, PATH_DELAY);
 		}
-	}, 150);
+	}, PATH_SPEED);
 }
 
+// animate all the paths for this level
 function animate_paths(level) {
-	shuffle(paths[level]);
+	if (RANDOMSIZE_PATH_ORDER) {
+		shuffle(paths[level]);
+	}
 
 	// movie the floor
-	floor.transition().duration(1000)
-		.attr("y", level * ROW_HEIGHT + 28);
+	floor.transition().duration(750).attr("y", level * ROW_HEIGHT + 28);
 
 	setTimeout(function() {
 		triangle.select("#row_" + level).classed("grayed_out", false);
@@ -217,10 +219,12 @@ function animate_paths(level) {
 				console.log("done");
 			}
 		});
-	}, 1000);
+	}, 750);
 }
 
 d3.select("#button button").on("click", function() {
+	d3.select(this).attr("disabled", true).classed("disabled", true);
+
 	// start at 1 in the 0th-row
 	triangle.select("#point_0_0 text").text("1");
 	animate_paths(1);

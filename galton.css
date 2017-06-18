@@ -34,6 +34,12 @@ svg {
 	margin-bottom: 5px;
 }
 
+#button button.disabled {
+	cursor: default;
+	color: #808080;
+	border-color: #808080;
+}
+
 #button button {
 	outline: none;
 	border: 1px solid black;
